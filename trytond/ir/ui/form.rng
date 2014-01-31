@@ -221,6 +221,17 @@
   <define name="attlist.field" combine="interleave">
     <optional>
       <attribute>
+        <name ns="">no_command</name>
+        <choice>
+          <value>0</value>
+          <value>1</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+  <define name="attlist.field" combine="interleave">
+    <optional>
+      <attribute>
         <name ns="">context_tree</name>
         <text/>
       </attribute>
@@ -477,6 +488,17 @@
   </define>
   <define name="attlist.field" combine="interleave">
     <optional>
+      <attribute a:defaultValue="0">
+        <name ns="">expand_toolbar</name>
+        <choice>
+          <value>0</value>
+          <value>1</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+  <define name="attlist.field" combine="interleave">
+    <optional>
       <attribute>
         <name ns="">string</name>
         <text/>
@@ -523,16 +545,6 @@
       <attribute>
         <name ns="">symbol</name>
         <text/>
-      </attribute>
-    </optional>
-  </define>
-  <define name="attlist.field" combine="interleave">
-    <optional>
-      <attribute name="expand_toolbar" a:defaultValue="0">
-        <choice>
-          <value>0</value>
-          <value>1</value>
-        </choice>
       </attribute>
     </optional>
   </define>
