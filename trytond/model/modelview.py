@@ -644,6 +644,8 @@ class ModelView(Model):
                     continue
                 field = cls._fields[fname]
                 relation = get_relation(field)
+                if element.get('relation'):
+                    relation = element.get('relation')
                 if not relation:
                     continue
                 mode = (
@@ -651,7 +653,8 @@ class ModelView(Model):
                 widget = element.attrib.get('widget', field._type)
                 views = get_views(relation, widget, view_ids, mode)
                 element.attrib['mode'] = ','.join(mode)
-                fields_attrs[fname].setdefault('views', {}).update(views)
+                if not element.get('relation'):
+                    fields_attrs[fname].setdefault('views', {}).update(views)
 
             if type == 'tree' and element.get('name') in fields_width:
                 element.set('width', str(fields_width[element.get('name')]))
