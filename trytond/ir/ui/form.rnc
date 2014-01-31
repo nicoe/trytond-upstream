@@ -88,6 +88,7 @@ attlist.field &= attribute readonly { "0" | "1" }?
 attlist.field &=
   [ a:defaultValue = "0" ] attribute tree_invisible { "0" | "1" }?
 attlist.field &= attribute mode { text }?
+attlist.field &= attribute group { text }?
 attlist.field &= attribute view_ids { text }?
 attlist.field &= attribute product { text }?
 attlist.field &=

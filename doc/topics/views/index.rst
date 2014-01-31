@@ -251,6 +251,9 @@ Display a field of the object with the value of the current record.
       specifies the order of the view used to display the relation. (Example:
       ``tree,form``)
 
+    * ``group``: Only for One2Many fields: it will synchronize the selected
+      record on each widget of the same group.
+
     * ``view_ids``: A comma separated list that specifies the view ids used to
       display the relation. For Many2One and Many2Many, the order should always
       be tree then form.

@@ -220,12 +220,16 @@
   </define>
   <define name="attlist.field" combine="interleave">
     <optional>
-      <attribute name="context_tree"/>
+      <attribute>
+        <name ns="">context_tree</name>
+        <text/>
+      </attribute>
     </optional>
   </define>
   <define name="attlist.field" combine="interleave">
     <optional>
-      <attribute name="fill">
+      <attribute>
+        <name ns="">fill</name>
         <choice>
           <value>0</value>
           <value>1</value>
@@ -354,6 +358,14 @@
     <optional>
       <attribute>
         <name ns="">mode</name>
+        <text/>
+      </attribute>
+    </optional>
+  </define>
+  <define name="attlist.field" combine="interleave">
+    <optional>
+      <attribute>
+        <name ns="">group</name>
         <text/>
       </attribute>
     </optional>
