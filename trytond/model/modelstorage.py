@@ -4,6 +4,7 @@
 import datetime
 import time
 import csv
+import logging
 import random
 
 from decimal import Decimal
@@ -1378,6 +1379,11 @@ class ModelStorage(Model):
                             values = value or []
                         for value in values:
                             if value not in test:
+                                logging.getLogger().debug(
+                                    'Bad Selection : field %s of model %s :'
+                                    ' %s is not in %s' % (
+                                        field_name, cls.__name__, value,
+                                        test))
                                 error_args = cls.__names__(field_name)
                                 error_args['value'] = value
                                 raise SelectionValidationError(gettext(
