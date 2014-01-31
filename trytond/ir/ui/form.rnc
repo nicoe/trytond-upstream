@@ -69,7 +69,9 @@ attlist.field &=
     | "time"
     | "timedelta"
     | "url"
+    | "source"
   }?
+attlist.field &= attribute context_tree { text }?
 attlist.field &= attribute fill { "0" | "1" }?
 attlist.field &= attribute yexpand { "0" | "1" }?
 attlist.field &= attribute yfill { "0" | "1" }?

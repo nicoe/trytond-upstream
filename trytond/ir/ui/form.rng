@@ -213,14 +213,19 @@
           <value>time</value>
           <value>timedelta</value>
           <value>url</value>
+          <value>source</value>
         </choice>
       </attribute>
     </optional>
   </define>
   <define name="attlist.field" combine="interleave">
     <optional>
-      <attribute>
-        <name ns="">fill</name>
+      <attribute name="context_tree"/>
+    </optional>
+  </define>
+  <define name="attlist.field" combine="interleave">
+    <optional>
+      <attribute name="fill">
         <choice>
           <value>0</value>
           <value>1</value>
