@@ -36,6 +36,17 @@
   <define name="attlist.tree" combine="interleave">
     <optional>
       <attribute>
+        <name ns="">editable_open</name>
+        <choice>
+          <value>0</value>
+          <value>1</value>
+        </choice>
+      </attribute>
+    </optional>
+  </define>
+  <define name="attlist.tree" combine="interleave">
+    <optional>
+      <attribute>
         <name ns="">sequence</name>
         <text/>
       </attribute>
