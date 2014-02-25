@@ -214,6 +214,7 @@
           <value>timedelta</value>
           <value>url</value>
           <value>source</value>
+          <value>multiselection</value>
         </choice>
       </attribute>
     </optional>
