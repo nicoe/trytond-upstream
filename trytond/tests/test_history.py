@@ -498,6 +498,12 @@ class HistoryTestCase(unittest.TestCase):
             self.assertEqual({r.value for r in records}, {1})
             self.assertEqual(len(records), n)
 
+            with Transaction().set_context(_datetime=second_stamp,
+                    _datetime_exclude=True):
+                history = History(history_id)
+            self.assertEqual(history.value, 1)
+            self.assertEqual([l.name for l in history.lines], ['a', 'b'])
+
 
 def suite():
     return unittest.TestLoader().loadTestsFromTestCase(HistoryTestCase)
