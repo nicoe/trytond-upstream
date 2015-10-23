@@ -6,6 +6,7 @@ tree = element tree { attlist.tree,
   }
 attlist.tree &= attribute on_write { text }?
 attlist.tree &= attribute editable { "0" | "1" }?
+attlist.tree &= attribute always_expand { "0" | "1" }?
 attlist.tree &= attribute editable_open { "0" | "1" }?
 attlist.tree &= attribute sequence { text }?
 attlist.tree &=
