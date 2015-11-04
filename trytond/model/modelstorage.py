@@ -1815,12 +1815,12 @@ class ModelStorage(Model):
                         or context != record._context):
                     latter.append(record)
                     continue
-                save_values[record] = record._save_values
-                values[record] = record._values
+                save_values[id(record)] = record._save_values
+                values[id(record)] = record._values
                 record._values = None
                 if record.id is None or record.id < 0:
                     to_create.append(record)
-                elif save_values[record]:
+                elif save_values[id(record)]:
                     to_write.append(record)
             transaction = Transaction()
             try:
@@ -1829,17 +1829,17 @@ class ModelStorage(Model):
                         transaction.reset_context(), \
                         transaction.set_context(context, _check_access=False):
                     if to_create:
-                        news = cls.create([save_values[r] for r in to_create])
+                        news = cls.create([save_values[id(r)] for r in to_create])
                         for record, new in zip(to_create, news):
                             record._ids.remove(record.id)
                             record._id = new.id
                             record._ids.append(record.id)
                     if to_write:
                         cls.write(*sum(
-                                (([r], save_values[r]) for r in to_write), ()))
+                                (([r], save_values[id(r)]) for r in to_write), ()))
             except Exception:
                 for record in to_create + to_write:
-                    record._values = values[record]
+                    record._values = values[id(record)]
                 raise
             for record in to_create + to_write:
                 record._init_values = None
