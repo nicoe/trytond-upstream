@@ -26,6 +26,8 @@ from trytond.pool import Pool, isregisteredby
 from trytond import backend
 from trytond.model import Workflow, ModelSQL, ModelSingleton, ModelView, fields
 from trytond.model.fields import get_eval_fields, Function
+from trytond.model.fields.dict import TranslatedDict
+from trytond.model.fields.selection import TranslatedSelection
 from trytond.tools import is_instance_method, file_open
 from trytond.transaction import Transaction
 from trytond.cache import Cache
@@ -440,6 +442,10 @@ class ModuleTestCase(unittest.TestCase):
 
                     # Skip if it is a field
                     if attr in model._fields:
+                        continue
+                    if isinstance(
+                            getattr(model, attr),
+                            (TranslatedSelection, TranslatedDict)):
                         continue
                     fnames = [attr[len(prefix):] for prefix in prefixes
                         if attr.startswith(prefix)]
