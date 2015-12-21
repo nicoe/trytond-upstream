@@ -9,6 +9,7 @@ attlist.tree &= attribute editable { "0" | "1" }?
 attlist.tree &= attribute always_expand { "0" | "1" }?
 attlist.tree &= attribute editable_open { "0" | "1" }?
 attlist.tree &= attribute sequence { text }?
+attlist.tree &= attribute colors { text }?
 attlist.tree &=
   [ a:defaultValue = "0" ] attribute keyword_open { "0" | "1" }?
 attlist.tree &=

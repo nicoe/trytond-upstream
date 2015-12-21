@@ -145,7 +145,7 @@ class View(ModelSQL, ModelView):
             }
 
             def encode(element):
-                for attr in ('states', 'domain', 'spell'):
+                for attr in ('states', 'domain', 'spell', 'colors'):
                     if not element.get(attr):
                         continue
                     try:
