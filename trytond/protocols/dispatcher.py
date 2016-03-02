@@ -23,6 +23,7 @@ from trytond.exceptions import (
     RateLimitException, TimeoutException)
 from trytond.tools import is_instance_method
 from trytond.wsgi import app
+from trytond.perf_analyzer import PerfLog, profile, logger as perf_logger
 from trytond.worker import run_task
 from .wrappers import with_pool
 
@@ -174,7 +175,18 @@ def _dispatch(request, pool, *args, **kwargs):
                 c_args, c_kwargs, transaction.context, transaction.timestamp \
                     = rpc.convert(obj, *args, **kwargs)
                 transaction.context['_request'] = request.context
+
+                try:
+                    PerfLog().on_enter(pool.get('res.user')(user), session)
+                except Exception:
+                    perf_logger.exception('on_enter failed')
                 meth = getattr(obj, method)
+                try:
+                    wrapped_meth = profile(meth)
+                except Exception:
+                    perf_logger.exception('profile failed')
+                else:
+                    meth = wrapped_meth
                 if (rpc.instantiate is None
                         or not is_instance_method(obj, method)):
                     result = rpc.result(meth(*c_args, **c_kwargs))

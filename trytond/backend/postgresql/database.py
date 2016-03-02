@@ -45,6 +45,8 @@ from trytond.backend.database import DatabaseInterface, SQLType
 from trytond.config import config, parse_uri
 from trytond.tools.gevent import is_gevent_monkey_patched
 
+from trytond.perf_analyzer import analyze
+
 __all__ = ['Database', 'DatabaseIntegrityError', 'DatabaseOperationalError',
     'DatabaseTimeoutError']
 
