@@ -23,7 +23,8 @@ from trytond.exceptions import (
     RateLimitException, TimeoutException)
 from trytond.tools import is_instance_method
 from trytond.wsgi import app
-from trytond.perf_analyzer import PerfLog, profile, logger as perf_logger
+from trytond.perf_analyzer import PerfLog, profile
+from trytond.perf_analyzer import logger as perf_logger
 from trytond.worker import run_task
 from .wrappers import with_pool
 
