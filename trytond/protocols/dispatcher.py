@@ -173,6 +173,11 @@ def _dispatch(request, pool, *args, **kwargs):
         with Transaction().start(pool.database_name, user,
                 readonly=rpc.readonly, timeout=rpc.timeout) as transaction:
             try:
+                PerfLog().on_enter(pool.get('res.user')(user), session,
+                    request.method, args, kwargs)
+            except:
+                perf_logger.exception('on_enter failed')
+            try:
                 c_args, c_kwargs, transaction.context, transaction.timestamp \
                     = rpc.convert(obj, *args, **kwargs)
                 transaction.context['_request'] = request.context
@@ -224,6 +229,10 @@ def _dispatch(request, pool, *args, **kwargs):
             context = {'_request': request.context}
             security.reset(pool.database_name, session, context=context)
         logger.debug('Result: %s', result)
+        try:
+            PerfLog().on_leave(result)
+        except Exception:
+            perf_logger.exception('on_leave failed')
         response = app.make_response(request, result)
         if rpc.readonly and rpc.cache:
             response.headers.extend(rpc.cache.headers())
