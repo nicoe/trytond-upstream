@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from collections import defaultdict
 from io import BytesIO
 from lxml import etree
+import logging
 
 import polib
 from sql import Column, Null, Literal
@@ -838,7 +839,14 @@ class Translation(ModelSQL, ModelView):
                                 to_save.append(old_translation)
                             else:
                                 translations.add(old_translation)
-        cls.save([_f for _f in to_save if _f])
+        # JCA : Add try catch to help with debugging
+        try:
+            cls.save([_f for _f in to_save if _f])
+        except Exception:
+            logging.getLogger().debug('Failed to save translations')
+            for data in to_save:
+                logging.getLogger().debug('    ' + str(data._save_values))
+            raise
         translations |= set(to_save)
 
         if translations:
