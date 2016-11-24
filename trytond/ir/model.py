@@ -1350,10 +1350,16 @@ class PrintModelGraphStart(ModelView):
     level = fields.Integer('Level', required=True)
     filter = fields.Text('Filter', help="Entering a Python "
             "Regular Expression will exclude matching models from the graph.")
+    # JCA : Add ignore function option
+    ignore_function = fields.Boolean('Ignore Function fields')
 
     @staticmethod
     def default_level():
         return 1
+
+    @staticmethod
+    def default_ignore_function():
+        return False
 
 
 class PrintModelGraph(Wizard):
@@ -1375,6 +1381,7 @@ class PrintModelGraph(Wizard):
             'ids': Transaction().context.get('active_ids'),
             'level': self.start.level,
             'filter': self.start.filter,
+            'ignore_function': self.start.ignore_function,
             }
 
 
@@ -1437,12 +1444,18 @@ class ModelGraph(Report):
         for model in models:
             if filter and re.search(filter, model.model):
                 continue
+            ModelClass = pool.get(model.model)
             label = '"{' + model.model + '\\n'
             if model.fields:
                 label += '|'
             for field in model.fields:
                 if field.name in ('create_uid', 'write_uid',
                         'create_date', 'write_date', 'id'):
+                    continue
+                field_desc = ModelClass._fields[field.name]
+                # JCA : Add ignore function option
+                if (isinstance(field_desc, fields.Function)
+                        and not isinstance(field_desc, fields.Property)):
                     continue
                 label += '+ ' + field.name + ': ' + field.ttype
                 if field.relation:
@@ -1455,6 +1468,11 @@ class ModelGraph(Report):
 
             for field in model.fields:
                 if field.name in ('create_uid', 'write_uid'):
+                    continue
+                field_desc = ModelClass._fields[field.name]
+                # JCA : Add ignore function option
+                if (isinstance(field_desc, fields.Function)
+                        and not isinstance(field_desc, fields.Property)):
                     continue
                 if field.relation:
                     node_name = '"%s"' % field.relation
