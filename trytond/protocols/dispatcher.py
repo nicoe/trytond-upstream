@@ -173,7 +173,7 @@ def _dispatch(request, pool, *args, **kwargs):
         with Transaction().start(pool.database_name, user,
                 readonly=rpc.readonly, timeout=rpc.timeout) as transaction:
             try:
-                PerfLog().on_enter(pool.get('res.user')(user), session,
+                PerfLog().on_enter(user, session,
                     request.method, args, kwargs)
             except:
                 perf_logger.exception('on_enter failed')
