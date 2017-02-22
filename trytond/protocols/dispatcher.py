@@ -174,7 +174,7 @@ def _dispatch(request, pool, *args, **kwargs):
                 readonly=rpc.readonly, timeout=rpc.timeout) as transaction:
             try:
                 PerfLog().on_enter(user, session,
-                    request.method, args, kwargs)
+                    method, args, kwargs)
             except:
                 perf_logger.exception('on_enter failed')
             try:
