@@ -12,6 +12,7 @@ from trytond.pyson import PYSONDecoder, PYSONEncoder
 from trytond.transaction import Transaction
 from trytond.cache import Cache
 from trytond.pool import Pool
+from trytond.server_context import ServerContext
 from trytond.rpc import RPC
 
 from .fields import on_change_result
@@ -921,19 +922,23 @@ class ModelView(Model):
                                     target_changed['id'] = target.id
                                     value['update'].append(target_changed)
                         else:
-                            if isinstance(target, ModelView):
-                                # Ensure initial values are returned because
-                                # target was instantiated on server side.
-                                target_init_values = target._init_values
-                                target._init_values = None
-                                try:
-                                    added_values = target._changed_values
-                                finally:
-                                    target._init_values = target_init_values
-                            else:
-                                added_values = target._default_values
-                            added_values['id'] = target.id
-                            value['add'].append((i, added_values))
+                            # automatically get a one2Many rec_name
+                            # to limit number of requests
+                            with ServerContext().set_context(
+                                    _default_rec_names=True):
+                                if isinstance(target, ModelView):
+                                    # Ensure initial values are returned because
+                                    # target was instantiated on server side.
+                                    target_init_values = target._init_values
+                                    target._init_values = None
+                                    try:
+                                        added_values = target._changed_values
+                                    finally:
+                                        target._init_values = target_init_values
+                                else:
+                                    added_values = target._default_values
+                                added_values['id'] = target.id
+                                value['add'].append((i, added_values))
                     finally:
                         if t_values:
                             target._values = t_values
