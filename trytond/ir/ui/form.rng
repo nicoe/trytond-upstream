@@ -213,7 +213,6 @@
           <value>time</value>
           <value>timedelta</value>
           <value>url</value>
-          <value>source</value>
           <value>multiselection</value>
         </choice>
       </attribute>
@@ -480,17 +479,6 @@
     <optional>
       <attribute a:defaultValue="1">
         <name ns="">completion</name>
-        <choice>
-          <value>0</value>
-          <value>1</value>
-        </choice>
-      </attribute>
-    </optional>
-  </define>
-  <define name="attlist.field" combine="interleave">
-    <optional>
-      <attribute a:defaultValue="0">
-        <name ns="">expand_toolbar</name>
         <choice>
           <value>0</value>
           <value>1</value>
