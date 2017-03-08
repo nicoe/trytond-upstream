@@ -6,10 +6,7 @@ tree = element tree { attlist.tree,
   }
 attlist.tree &= attribute on_write { text }?
 attlist.tree &= attribute editable { "0" | "1" }?
-attlist.tree &= attribute always_expand { "0" | "1" }?
-attlist.tree &= attribute editable_open { "0" | "1" }?
 attlist.tree &= attribute sequence { text }?
-attlist.tree &= attribute colors { text }?
 attlist.tree &=
   [ a:defaultValue = "0" ] attribute keyword_open { "0" | "1" }?
 attlist.tree &=
@@ -82,9 +79,6 @@ attlist.button &= attribute string { text }?
 attlist.button &= attribute confirm { text }?
 attlist.button &= attribute name { text }
 attlist.button &= attribute states { text }?
-attlist.button &=
-    [ a:defaultValue="action" ]
-    attribute keyword { "relate" | "print" | "action" }?
 attlist.button &= attribute change { text }?
 attlist.button &= attribute type { "class" | "instance" }?
 attlist.button &=
