@@ -105,7 +105,9 @@ class Pool(object):
 
     @staticmethod
     def register_post_init_hooks(*hooks, **kwargs):
-        Pool._init_hooks[kwargs['module']] = hooks
+        if kwargs['module'] not in Pool._init_hooks:
+            Pool._init_hooks[kwargs['module']] = []
+        Pool._init_hooks[kwargs['module']] += hooks
 
     @classmethod
     def start(cls):
@@ -185,7 +187,6 @@ class Pool(object):
                 raise
             if restart:
                 self.init()
-            self.post_init()
 
     def post_init(self):
         for hook in self._post_init_calls[self.database_name]:
@@ -273,6 +274,7 @@ class Pool(object):
                 cls.__setup__()
             for cls in lst:
                 cls.__post_setup__()
+        self.post_init()
 
     def setup_mixin(self, modules, type=None, name=None):
         logger.info('setup mixin for "%s"', self.database_name)
