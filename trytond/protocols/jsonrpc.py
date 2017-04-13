@@ -5,6 +5,10 @@ from decimal import Decimal
 import json
 import base64
 
+try:
+    from werkzeug.datastructures import Headers
+except ImportError:
+    from werkzeug.wrappers import Headers
 from werkzeug.wrappers import Response
 from werkzeug.exceptions import (
     BadRequest, InternalServerError, Conflict, Forbidden, Locked,
@@ -187,6 +191,10 @@ class JSONProtocol:
             elif isinstance(data, Exception):
                 return InternalServerError(data)
             response = data
+
+        # add RPC Method in HTTP headers (better logging)
+        headers = Headers()
+        headers.add('RPC-Method', parsed_data['method'])
         return Response(json.dumps(
                 response, cls=JSONEncoder, separators=(',', ':')),
-            content_type='application/json')
+            content_type='application/json', headers=headers)
