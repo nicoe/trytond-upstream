@@ -81,6 +81,8 @@ class LoggingCursor(cursor):
 
 class PerfCursor(cursor):
     def execute(self, query, vars=None):
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(self.mogrify(query, vars))
         try:
             context = analyze_before(self)
         except Exception:
