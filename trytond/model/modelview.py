@@ -12,8 +12,8 @@ from trytond.pyson import PYSONDecoder, PYSONEncoder
 from trytond.transaction import Transaction
 from trytond.cache import Cache
 from trytond.pool import Pool
-from trytond.server_context import ServerContext
 from trytond.rpc import RPC
+from trytond.server_context import ServerContext
 
 from .fields import on_change_result
 
