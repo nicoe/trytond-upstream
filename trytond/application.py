@@ -8,11 +8,13 @@ from io import StringIO
 
 __all__ = ['app']
 
+LF = '%(process)s %(thread)s [%(asctime)s] %(levelname)s %(name)s %(message)s'
+
 log_file = os.environ.get('WSGI_LOG_FILE')
 if log_file:
     log_level = os.environ.get('LOG_LEVEL', 'ERROR')
     logging.basicConfig(level=getattr(logging, log_level),
-        filename=log_file)
+        format=LF, filename=log_file)
 
 # Logging must be set before importing
 logging_config = os.environ.get('TRYTOND_LOGGING_CONFIG')
