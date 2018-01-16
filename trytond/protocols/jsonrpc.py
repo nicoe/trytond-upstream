@@ -14,6 +14,11 @@ from werkzeug.exceptions import (
     BadRequest, InternalServerError, Conflict, Forbidden, Locked,
     TooManyRequests)
 
+try:
+    import uwsgi
+except ImportError:
+    uwsgi = None
+
 from trytond.protocols.wrappers import Request
 from trytond.exceptions import (
     TrytonException, UserWarning, LoginException, ConcurrencyException,
@@ -193,6 +198,8 @@ class JSONProtocol:
             response = data
 
         # add RPC Method in HTTP headers (better logging)
+        if uwsgi:
+            uwsgi.set_logvar('rpc', parsed_data['method'])
         headers = Headers()
         headers.add('RPC-Method', parsed_data['method'])
         return Response(json.dumps(
