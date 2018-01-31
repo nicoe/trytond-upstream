@@ -14,6 +14,7 @@ from werkzeug.exceptions import (
     BadRequest, InternalServerError, Conflict, Forbidden, Locked,
     TooManyRequests)
 
+# AKE: log RPC method (uwsgi and header)
 try:
     import uwsgi
 except ImportError:
@@ -197,11 +198,12 @@ class JSONProtocol:
                 return InternalServerError(data)
             response = data
 
-        # add RPC Method in HTTP headers (better logging)
+        # AKE: log RPC method (uwsgi and header)
         if uwsgi:
             uwsgi.set_logvar('rpc', parsed_data['method'])
         headers = Headers()
         headers.add('RPC-Method', parsed_data['method'])
+
         return Response(json.dumps(
                 response, cls=JSONEncoder, separators=(',', ':')),
             content_type='application/json', headers=headers)
