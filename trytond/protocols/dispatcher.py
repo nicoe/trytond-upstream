@@ -200,9 +200,12 @@ def _dispatch(request, pool, *args, **kwargs):
     user = request.user_id
 
     # AKE: add session to transaction context
-    session = None
     if request.authorization.type == 'session':
         session = request.authorization.get('session')
+        party = None
+    elif request.authorization.type == 'token':
+        session = request.authorization.get('token')
+        party = request.authorization.get('party_id')
 
     # AKE: perf analyzer hooks
     try:
