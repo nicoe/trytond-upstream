@@ -230,11 +230,6 @@ def _dispatch(request, pool, *args, **kwargs):
                         'token': token,
                         })
                 transaction.context['_request'] = request.context
-
-                try:
-                    PerfLog().on_enter(pool.get('res.user')(user), session)
-                except Exception:
-                    perf_logger.exception('on_enter failed')
                 meth = getattr(obj, method)
 
                 # AKE: perf analyzer hooks
