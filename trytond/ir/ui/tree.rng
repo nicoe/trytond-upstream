@@ -184,6 +184,14 @@
   <define name="attlist.field" combine="interleave">
     <optional>
       <attribute>
+        <name ns="">highlight_sum</name>
+        <text/>
+      </attribute>
+    </optional>
+  </define>
+  <define name="attlist.field" combine="interleave">
+    <optional>
+      <attribute>
         <name ns="">width</name>
         <text/>
       </attribute>
