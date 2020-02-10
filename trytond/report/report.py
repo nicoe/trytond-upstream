@@ -9,10 +9,10 @@ import math
 import subprocess
 import tempfile
 import time
-import unicodedata
 import warnings
 import zipfile
 import operator
+import requests
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from io import BytesIO
@@ -33,6 +33,7 @@ from genshi.filters import Translator
 from trytond.i18n import gettext
 from trytond.pool import Pool, PoolBase
 from trytond.transaction import Transaction
+from trytond.config import config
 from trytond.tools import slugify
 from trytond.url import URLMixin
 from trytond.rpc import RPC
@@ -46,7 +47,9 @@ try:
 except ImportError:
     Manifest, MANIFEST = None, None
 
+
 logger = logging.getLogger(__name__)
+
 
 MIMETYPES = {
     'odt': 'application/vnd.oasis.opendocument.text',
@@ -91,7 +94,19 @@ TIMEDELTA_DEFAULT_CONVERTER['w'] = TIMEDELTA_DEFAULT_CONVERTER['d'] * 7
 TIMEDELTA_DEFAULT_CONVERTER['M'] = TIMEDELTA_DEFAULT_CONVERTER['d'] * 30
 TIMEDELTA_DEFAULT_CONVERTER['Y'] = TIMEDELTA_DEFAULT_CONVERTER['d'] * 365
 
-REPORT_NAME_MAX_LENGTH = 200
+
+class UnoConversionError(UserError):
+    pass
+
+
+class ReportFactory:
+
+    def __call__(self, records, **kwargs):
+        data = {}
+        data['objects'] = records  # XXX To remove
+        data['records'] = records
+        data.update(kwargs)
+        return data
 
 
 class TranslateFactory:
@@ -158,23 +173,9 @@ class Report(URLMixin, PoolBase):
             action_report = ActionReport(action_id)
 
         def report_name(records, reserved_length=0):
-            names = []
-            name_length = 0
-            record_count = len(records)
-            max_length = (REPORT_NAME_MAX_LENGTH
-                - reserved_length
-                - len(str(record_count)) - 2)
-            for record in records[:5]:
-                record_name = record.rec_name
-                name_length += len(
-                    unicodedata.normalize('NFKD', record_name)) + 1
-                if name_length > max_length:
-                    break
-                names.append(record_name)
-
-            name = '-'.join(names)
-            if len(records) > len(names):
-                name += '__' + str(record_count - len(names))
+            name = '-'.join(r.rec_name for r in records[:5])
+            if len(records) > 5:
+                name += '__' + str(len(records[5:]))
             return name
 
         records = []
@@ -218,12 +219,8 @@ class Report(URLMixin, PoolBase):
                 groups[0], headers[0], data, action_report)
         if not isinstance(content, str):
             content = bytearray(content) if bytes == str else bytes(content)
-        action_report_name = action_report.name[:REPORT_NAME_MAX_LENGTH]
-        filename = join_string.join(
-            filter(None, [
-                action_report_name,
-                report_name(
-                    records, len(action_report_name) + len(join_string))]))
+        filename = '-'.join(
+            filter(None, [action_report.name, report_name(records)]))
         return (oext, content, action_report.direct_print, filename)
 
     @classmethod
@@ -387,6 +384,32 @@ class Report(URLMixin, PoolBase):
                 os.rmdir(dtemp)
             except OSError:
                 pass
+
+    @classmethod
+    def convert_api(cls, report, data, timeout):
+        # AKE: support printing via external api
+        input_format = report.template_extension
+        output_format = report.extension or report.template_extension
+
+        if output_format in MIMETYPES:
+            return output_format, data
+
+        oext = FORMAT2EXT.get(output_format, output_format)
+        url_tpl = config.get('report', 'api')
+        url = url_tpl.format(oext=oext)
+        files = {'file': ('doc.' + input_format, data)}
+        for count in range(config.getint('report', 'unoconv_retry'), -1, -1):
+            try:
+                r = requests.post(url, files=files, timeout=timeout)
+                if r.status_code < 300:
+                    return oext, r.content
+                else:
+                    raise UnoConversionError(r)
+            except UnoConversionError:
+                if count:
+                    time.sleep(0.1)
+                    continue
+                raise
 
     @classmethod
     def format_date(cls, value, lang=None, format=None):
