@@ -322,7 +322,11 @@ class ModelView(Model):
                 raise ValueError("Missing view architecture for %s" % ((
                             cls.__name__, view_id, view_type),))
             parser = etree.XMLParser(remove_comments=True, resolve_entities=False)
-            tree = etree.fromstring(result['arch'], parser=parser)
+            try:
+                encoded_arch = result['arch'].encode('utf-8')
+            except UnicodeEncodeError:
+                encoded_arch = result['arch']
+            tree = etree.fromstring(encoded_arch, parser=parser)
             for view in views:
                 if view.domain:
                     if not PYSONDecoder({'context': Transaction().context}
@@ -378,7 +382,11 @@ class ModelView(Model):
         # Update arch and compute fields from arch
         parser = etree.XMLParser(
             remove_blank_text=True, resolve_entities=False)
-        tree = etree.fromstring(result['arch'], parser)
+        try:
+            encoded_arch = result['arch'].encode('utf-8')
+        except UnicodeEncodeError:
+            encoded_arch = result['arch']
+        tree = etree.fromstring(encoded_arch, parser)
         result['arch'], result['fields'] = cls.parse_view(
             tree, result['type'], result['field_childs'], level=level)
 
