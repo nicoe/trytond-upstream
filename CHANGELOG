@@ -1,3 +1,4 @@
+* Add estimation count to ModelStorage
 * Deduplicate entries in domain inversion's simplify
 * Use UNION for 'Or'-ed domain with subqueries
 * Use local cache for relation fields in readonly transactions
