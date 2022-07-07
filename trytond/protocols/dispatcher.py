@@ -20,7 +20,7 @@ from trytond import __version__
 from trytond.transaction import Transaction
 from trytond.exceptions import (
     UserError, UserWarning, ConcurrencyException, LoginException,
-    RateLimitException)
+    RateLimitException, TimeoutException)
 from trytond.tools import is_instance_method
 from trytond.wsgi import app
 from trytond.worker import run_task
@@ -169,7 +169,7 @@ def _dispatch(request, pool, *args, **kwargs):
         if count != retry:
             time.sleep(0.02 * (retry - count))
         with Transaction().start(pool.database_name, user,
-                readonly=rpc.readonly) as transaction:
+                readonly=rpc.readonly, timeout=rpc.timeout) as transaction:
             try:
                 c_args, c_kwargs, transaction.context, transaction.timestamp \
                     = rpc.convert(obj, *args, **kwargs)
@@ -186,6 +186,9 @@ def _dispatch(request, pool, *args, **kwargs):
                     else:
                         result = [rpc.result(meth(i, *c_args, **c_kwargs))
                             for i in inst]
+            except backend.DatabaseTimeoutError as exception:
+                logger.debug(log_message, *log_args, exc_info=True)
+                raise TimeoutException from exception
             except backend.DatabaseOperationalError:
                 if count and not rpc.readonly:
                     transaction.rollback()
