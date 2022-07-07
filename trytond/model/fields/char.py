@@ -1,8 +1,11 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
+import string
 import warnings
 
+from sql import Query, Expression
 from sql.conditionals import Coalesce, NullIf
+from sql.functions import Trim
 from sql.operators import Not
 
 from trytond.rpc import RPC
@@ -24,7 +27,7 @@ class Char(FieldTranslate):
     def __init__(self, string='', size=None, help='', required=False,
             readonly=False, domain=None, states=None, translate=False,
             select=False, on_change=None, on_change_with=None, depends=None,
-            context=None, loading=None, autocomplete=None):
+            context=None, loading=None, autocomplete=None, strip=True):
         '''
         :param translate: A boolean. If ``True`` the field is translatable.
         :param size: A integer. If set defines the maximum size of the values.
@@ -40,6 +43,7 @@ class Char(FieldTranslate):
             warnings.warn('autocomplete argument is deprecated, use the '
                 'depends decorator', DeprecationWarning, stacklevel=2)
             self.autocomplete |= set(autocomplete)
+        self.strip = strip
         self.translate = translate
         self.__size = None
         self.size = size
@@ -57,6 +61,22 @@ class Char(FieldTranslate):
     @property
     def _sql_type(self):
         return 'VARCHAR(%s)' % self.size if self.size else 'VARCHAR'
+
+    def __set__(self, inst, value):
+        if value is not None and self.strip:
+            if isinstance(value, (Query, Expression)):
+                value = Trim(value, characters=string.whitespace)
+            else:
+                value = value.strip()
+        super().__set__(inst, value)
+
+    def sql_format(self, value):
+        if value is not None and self.strip:
+            if isinstance(value, (Query, Expression)):
+                value = Trim(value, characters=string.whitespace)
+            else:
+                value = value.strip()
+        return super().sql_format(value)
 
     def set_rpc(self, model):
         super(Char, self).set_rpc(model)
@@ -184,6 +204,7 @@ class Char(FieldTranslate):
     def definition(self, model, language):
         definition = super().definition(model, language)
         definition['autocomplete'] = list(self.autocomplete)
+        definition['strip'] = self.strip
         if self.size is not None:
             definition['size'] = self.size
         return definition
