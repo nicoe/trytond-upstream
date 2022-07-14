@@ -45,7 +45,8 @@ from trytond.backend.database import DatabaseInterface, SQLType
 from trytond.config import config, parse_uri
 from trytond.tools.gevent import is_gevent_monkey_patched
 
-from trytond.perf_analyzer import analyze
+from trytond.perf_analyzer import analyze_before, analyze_after
+from trytond.perf_analyzer import logger as perf_logger
 
 __all__ = ['Database', 'DatabaseIntegrityError', 'DatabaseOperationalError',
     'DatabaseTimeoutError']
@@ -76,6 +77,36 @@ class LoggingCursor(cursor):
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug(self.mogrify(sql, args))
         cursor.execute(self, sql, args)
+
+
+class PerfCursor(cursor):
+    def execute(self, query, vars=None):
+        try:
+            context = analyze_before(self)
+        except Exception:
+            perf_logger.exception('analyse_before failed')
+            context = None
+        ret = super(PerfCursor, self).execute(query, vars)
+        if context is not None:
+            try:
+                analyze_after(*context)
+            except Exception:
+                perf_logger.exception('analyse_after failed')
+        return ret
+
+    def callproc(self, procname, vars=None):
+        try:
+            context = analyze_before(self)
+        except Exception:
+            perf_logger.exception('analyse_before failed')
+            context = None
+        ret = super(PerfCursor, self).callproc(procname, vars)
+        if context is not None:
+            try:
+                analyze_after(*context)
+            except Exception:
+                perf_logger.exception('analyse_after failed')
+        return ret
 
 
 class ForSkipLocked(For):
@@ -296,6 +327,7 @@ class Database(DatabaseInterface):
         if statements:
             cursor = conn.cursor()
             cursor.execute(';'.join(statements))
+        conn.cursor_factory = PerfCursor
         return conn
 
     def put_connection(self, connection, close=False):
