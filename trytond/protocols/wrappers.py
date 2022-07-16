@@ -14,6 +14,7 @@ except ImportError:
 
 from werkzeug.datastructures import Authorization
 from werkzeug.exceptions import HTTPException, abort
+from werkzeug.http import wsgi_to_bytes, bytes_to_wsgi
 from werkzeug.wrappers import Request as _Request
 from werkzeug.wrappers import Response
 
@@ -132,8 +133,7 @@ class Request(_Request):
 def parse_authorization_header(value):
     if not value:
         return
-    if not isinstance(value, bytes):
-        value = value.encode('latin1')
+    value = wsgi_to_bytes(value)
     try:
         auth_type, auth_info = value.split(None, 1)
         auth_type = auth_type.lower()
@@ -147,9 +147,9 @@ def parse_authorization_header(value):
         except Exception:
             return
         return Authorization('session', {
-                'username': username.decode("latin1"),
+                'username': bytes_to_wsgi(username),
                 'userid': userid,
-                'session': session.decode("latin1"),
+                'session': bytes_to_wsgi(session),
                 })
     # JMO: the initial implementation used 'token',
     # but the IETF specifies 'Bearer'
@@ -253,7 +253,7 @@ def user_application(name, json=True):
             pool = Pool()
             UserApplication = pool.get('res.user.application')
 
-            authorization = request.headers['Authorization']
+            authorization = wsgi_to_bytes(request.headers['Authorization'])
             try:
                 auth_type, auth_info = authorization.split(None, 1)
                 auth_type = auth_type.lower()
@@ -262,7 +262,7 @@ def user_application(name, json=True):
             if auth_type != 'bearer':
                 abort(HTTPStatus.FORBIDDEN)
 
-            application = UserApplication.check(auth_info, name)
+            application = UserApplication.check(bytes_to_wsgi(auth_info), name)
             if not application:
                 abort(HTTPStatus.FORBIDDEN)
             transaction = Transaction()
